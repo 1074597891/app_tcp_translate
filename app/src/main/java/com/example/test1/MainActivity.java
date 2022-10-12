@@ -1,6 +1,7 @@
 package com.example.test1;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -122,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     private MyTcpClient myTcpClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         InitView();
         connect_btn = findViewById(R.id.connect_btn);
-
         handler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(@NonNull Message msg) {
