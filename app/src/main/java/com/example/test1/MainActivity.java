@@ -3,8 +3,6 @@ package com.example.test1;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -27,7 +25,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
-import java.util.Objects;
 
 
 class MyTcpClient{
@@ -35,7 +32,7 @@ class MyTcpClient{
     private OutputStream out;
     private InputStream in;
     public int serverStatus =1;
-    private String msg;
+
 
 
     public boolean connect(String IP , int Port){
@@ -56,6 +53,17 @@ class MyTcpClient{
             e.printStackTrace();
         }
         return isConnect;
+    }
+
+    public  void sendMsg(String msg){
+        try{
+            if(out == null) {
+                out = client.getOutputStream();
+            }
+            out.write(msg.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -103,33 +111,34 @@ class MyTcpClient{
 
 }
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity<hand, MyTcpClient> extends AppCompatActivity {
+    private com.example.test1.MyTcpClient myTcpClient;
 
     private EditText ip_et;
     private EditText port_et;
-
+    private TextView temp_tv;
+    private TextView humi_tv;
     private Handler handler;
     private Button connect_btn;
 
     private int connect_flag;
-
 
     private void InitView() {
         connect_flag = 0;
 
         ip_et = findViewById(R.id.ip_et);
         port_et = findViewById(R.id.port_et);
-
+        temp_tv = findViewById(R.id.temp_tv);
+        humi_tv = findViewById(R.id.humi_tv);
+        connect_btn = findViewById(R.id.connect_btn);
     }
 
 
-    private MyTcpClient myTcpClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         InitView();
-        connect_btn = findViewById(R.id.connect_btn);
 
         handler = new Handler(Looper.getMainLooper()) {
             @Override
@@ -139,9 +148,8 @@ public class MainActivity extends AppCompatActivity {
                     case 1:
                         connect_flag = 1;
                         rcvMsgHandler();
-                        connect_btn.setText("连接成功");
+                        connect_btn.setText("断开连接");
                         Toast.makeText(MainActivity.this, "连接成功", Toast.LENGTH_SHORT).show();
-
                         break;
                     case 2:
                         connect_flag = 0;
@@ -152,31 +160,28 @@ public class MainActivity extends AppCompatActivity {
                         connect_btn.setText("连 接");
                         Toast.makeText(MainActivity.this, "连接已断开", Toast.LENGTH_SHORT).show();
                         break;
-
                     case 4:
                         String Msg = msg.obj.toString();
-                        Intent intent = null;
-                        intent = new Intent(MainActivity.this,FunctionActivity.class);
-                        intent.putExtra("amessage", Msg);
-                        startActivity(intent);
-
-
-
-
-//                    case 4:
-//                        String Msg = msg.obj.toString();
-//                        connect_btn.setText("跳 转");
-//                        connect_btn.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View view) {
-//                                Intent intent = null ;
-//                                intent = new Intent(MainActivity.this,FunctionActivity.class);
-//                                intent.putExtra("amessage", Msg);
-//                                startActivity(intent);
-//                            }
-//                        });
-
-
+                        String [] S0 = Msg.split(",");
+                        String [] S1 = S0[0].split(":");
+                        String [] S2 = S0[1].split(":");
+                        String S_eq1 = "en";
+                        String S_eq2 = "ch";
+                        if (S1[0].equals(S_eq1)){
+                            String temp = S1[1];
+                            temp_tv.setText(temp);
+                        }
+                        if (S2[0].equals(S_eq2)) {
+                            String humi = S2[1];
+                            try {
+                                String ch_humi = new String(humi.getBytes(),"GBK");
+                                Log.v("123", ch_humi);
+                                humi_tv.setText(ch_humi);
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        break;
                 }
             }
         };
@@ -232,10 +237,10 @@ public class MainActivity extends AppCompatActivity {
                     if (Msg != null) {
                         Log.v("接收服务端的消息", Msg);
 
-                    Message msg = new Message();
-                    msg.what = 4;
-                    msg.obj = Msg;
-                    handler.sendMessage(msg);
+                        Message msg = new Message();
+                        msg.what = 4;
+                        msg.obj = Msg;
+                        handler.sendMessage(msg);
                     } else {
                         Log.v("rcvMsgHandle:", "内存已释放!!!");
                         break;
