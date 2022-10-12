@@ -20,31 +20,23 @@ public class FunctionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_function);
         temp_tv = findViewById(R.id.temp_tv);
         humi_tv = findViewById(R.id.humi_tv);
-        Intent intent=getIntent();
+        Intent intent = getIntent();
         //通过这个标签得到之前的字符串
         String Msg = intent.getStringExtra("amessage");
-        String [] S0 = Msg.split(",");
-        String [] S1 = S0[0].split(":");
-        String [] S2 = S0[1].split(":");
+        String[] S0 = Msg.split(",");
+        String[] S1 = S0[0].split(":");
+        String[] S2 = S0[1].split(":");
         String S_eq1 = "en";
         String S_eq2 = "ch";
-        if (S1[0].equals(S_eq1)){
+        if (S1[0].equals(S_eq1)) {
             String temp = S1[1];
             temp_tv.setText(temp);
         }
-        if (S2[0].equals(S_eq2)){
+        if (S2[0].equals(S_eq2)) {
             String humi = S2[1];
-            try {
-                String ch_humi = new String(humi.getBytes(),"GBK");
-                Log.v("123",ch_humi);
-                humi_tv.setText(ch_humi);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            humi_tv.setText(humi);
+
 
         }
-
-
     }
-
 }
